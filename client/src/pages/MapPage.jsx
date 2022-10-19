@@ -2,7 +2,7 @@ import React from 'react'
 import GlobalStyle from '../components/GlobalStyle';
 import Map from '../components/Map'
 
-const Register = () => {
+const MapPage = () => {
     return (
         <div>
             <GlobalStyle />
@@ -11,4 +11,4 @@ const Register = () => {
     )
 }
 
-export default Register;
+export default MapPage;

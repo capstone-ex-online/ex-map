@@ -16,6 +16,8 @@
     "nodemon": "^2.0.19"
   },
   "dependencies": {
-    "concurrently": "^7.4.0"
+    "concurrently": "^7.4.0",
+    "styled-components": "^5.3.6",
+    "vector-icons": "^0.1.0"
   }
 }
