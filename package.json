@@ -16,8 +16,15 @@
     "nodemon": "^2.0.19"
   },
   "dependencies": {
+<<<<<<< HEAD
     "concurrently": "^7.4.0",
     "styled-components": "^5.3.6",
     "vector-icons": "^0.1.0"
+=======
+    "axios": "^1.1.2",
+    "concurrently": "^7.4.0",
+    "request": "^2.88.2",
+    "xml-js": "^1.6.11"
+>>>>>>> 0df8816b00f9e9514c7543c27255d41a6d3589a7
   }
 }

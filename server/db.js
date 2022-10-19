@@ -16,9 +16,9 @@ module.exports = function() {
     open: function(con) {
       con.connect(function(err) {
         if(err) {
-          console.log('mysql connection error: '+err)
+          console.log('Database connection error: '+err)
         } else {
-          console.log('mysql is connected successfully.')
+          console.log('Database is connected successfully.')
         }
       })
     }
