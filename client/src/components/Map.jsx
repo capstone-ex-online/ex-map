@@ -127,7 +127,7 @@ function Map() {
 
     }
 
-    let values = Object.values(mappingList).data;
+    // let values = Object.values(mappingList).data;
     
   }
 
@@ -213,7 +213,7 @@ function Map() {
                     <img src={exhibision.img_src} width="100px"></img>
                     <li>Name: {exhibision.ex_name}</li>
                     <li>Start_Date:{exhibision.start_date}</li>
-                    <li>Finish_Date: {exhibision.finish_date}</li>     //예시 리스트 출력
+                    <li>Finish_Date: {exhibision.finish_date}</li>     {/* 예시데이터 출력 */}
                   </ul>
                   <hr />
                 </>
