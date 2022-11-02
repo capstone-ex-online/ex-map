@@ -3,12 +3,15 @@ import styled from 'styled-components'
 import Axios from 'axios'
 import lock_on from '../assets/lock_on.png'
 import lock_off from '../assets/lock_off.png'
+import zoom_in from '../assets/plus.png'
+import zoom_off from '../assets/minus.png'
 import exampleImg from '../assets/first_main.jpg'
 
 
 const { kakao } = window;
 
 let mappingList = {};
+
 
 const MapPageContainer = styled.div`
   width: 100%;
@@ -55,7 +58,45 @@ const MapBox = styled.div`
   #setting {
     width:1100px;
     height:68px;
+
+    
+  
+    
+
+    .MapLockButton{
+      margin-top : 20px;
+      margin-left : 20px;
+      width : 28px;
+      height : 28px;
+      cursor: pointer;
+
+    }
+
+    .MapZoomIn{
+      margin-top : 20px;
+      margin-left : 20px;
+      width : 28px;
+      height : 28px;
+      cursor: pointer;
+      float : right;
+    }
+    
+    .MapZoomOut{
+      margin-top : 20px;
+      margin-left : 20px;
+      margin-right : 27px;
+      width : 28px;
+      height : 28px;
+      right : 27px;
+      cursor: pointer;
+      float : right;
+    }
   }
+`
+
+const ExhibitionList = styled.div`
+  width: 500px;
+  height: 500px;
 `
 
 function Map() {
@@ -86,12 +127,31 @@ function Map() {
     map.setDraggable(draggable);   
   }
 
+  // 지도 확대, 축소 컨트롤에서 확대 버튼을 누르면 호출되어 지도를 확대하는 함수입니다
+  function zoomIn() {
+    map.setLevel(map.getLevel() - 1);
+  }
+
+  // 지도 확대, 축소 컨트롤에서 축소 버튼을 누르면 호출되어 지도를 확대하는 함수입니다
+  function zoomOut() {
+    map.setLevel(map.getLevel() + 1);
+  }
+
+  const [MapLockstate, MapLocksetState]=useState(false);
+
+  function MapLock(){
+    MapLocksetState(!MapLockstate);
+    MapLockstate ? setDraggable(true) : setDraggable(false);
+
+  }
+
+
 
 
 
   Axios.get('http://localhost:5000/api/exhibition')
   .then((response) => {
-    // console.log(response.data)
+    console.log(response.data)
     makeMarkers(response.data)
   })
 
@@ -100,31 +160,62 @@ function Map() {
       let imageSize = new kakao.maps.Size(24, 35)
       let markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize)
 
-      let latitude = parseFloat(array[i].gpsY._text) 
-      let longitude = parseFloat(array[i].gpsX._text)
+      let latitude = array[i].ex_gpsy 
+      let longitude = array[i].ex_gpsx
       let position = new kakao.maps.LatLng(latitude, longitude)
 
       let marker = new kakao.maps.Marker({
         map: map,
         position: position,
-        image: markerImage
+        image: markerImage,
       })
+
+      // let object = {
+      //   marker: marker,
+      //   data: {
+      //     seq: array[i].seq._text,
+      //     title: array[i].title._text,
+      //     startDate: array[i].startDate._text,
+      //     endDate: array[i].endDate._text,
+      //     thumbnail: array[i].thumbnail._text
+
+
       let object = {
         marker: marker,
         data: {
-          seq: array[i].seq._text,
-          title: array[i].title._text,
-          startDate: array[i].startDate._text,
-          endDate: array[i].endDate._text,
-          thumbnail: array[i].thumbnail._text
+          seq: array[i].ex_id,
+          title: array[i].ex_title,
+          startDate: array[i].ex_start,
+          endDate: array[i].ex_end,
+          thumbnail: array[i].ex_img
+
         }
       }
 
       let temp_id = 'id' + i
       mappingList[temp_id] = object
-
       
+      kakao.maps.event.addListener(marker, 'click', function() {    
+        setExhiList([])    
+        let values = Object.values(mappingList)
 
+        for(let j = 0; j < values.length; j++) {
+          if(values[j].marker === marker) {
+            // if(exhiList.length === 0) {
+            //   setExhiList(values[j].data)
+            //   console.log(exhiList)
+            // } else {
+            //   let temp_arr = new Array(exhiList)
+            //   temp_arr.push(values[j].data)
+            //   setExhiList(temp_arr)
+            //   console.log(exhiList)
+            // }
+            setExhiList(new Array(values[j].data))
+            console.log(exhiList)
+          }
+        }
+
+      })
     }
 
     // let values = Object.values(mappingList).data;
@@ -134,14 +225,7 @@ function Map() {
   
 
 
-  const [state, setState]=useState(false);
-
-
-  function MapLock(){
-    setState(!state);
-    state ? setDraggable(true) : setDraggable(false);
-
-  }
+  
 
   var ExhibisionList=
   [
@@ -250,15 +334,39 @@ function Map() {
           <MapBox>
             <div id='map'></div>
             <span id='setting'>
-              <button className='MapLockButton' onClick={MapLock}>
-                {/* <image source= {state ? lock_on : lock_off }/> */}
-                LOCK
-              </button>
+              <img class='MapLockButton'src={MapLockstate ? lock_on : lock_off } alt="Lock Button" onClick={MapLock}></img>
+              <img class='MapZoomOut'src={zoom_off} alt="Zoom Off Button" onClick={zoomOut}></img>
+              <img class='MapZoomIn'src={zoom_in} alt="Zoom In Button" onClick={zoomIn}></img>
+
             </span>
           </MapBox>
           
         </MapContainer>
       </MapPageContainer>
+
+
+    // <MapPageContainer>
+    //   <MapBox>
+    //     <div id='map'></div>
+    //   </MapBox>
+    //   <ExhibitionList
+    //     exhiList={exhiList}
+    //   >
+    //     {exhiList && exhiList.map((exhibition, index) => {
+    //       return (
+    //         <div key={index}>
+    //           <h2>title: {exhibition.title}</h2>
+    //           <h2>startDate: {exhibition.startDate}</h2>
+    //           <h2>endDate: {exhibition.endDate}</h2>
+    //           <div style={{width: 100 + 'px', 
+    //             height: 100 + 'px', 
+    //             backgroundImage: `url(${exhibition.thumbnail})`,
+    //             backgroundSize: 100 + 'px'}}  ></div>
+    //         </div>
+    //       )
+    //     })}
+    //   </ExhibitionList>
+    // </MapPageContainer>
 
   )
 }
