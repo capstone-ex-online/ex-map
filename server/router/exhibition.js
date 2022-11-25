@@ -1,12 +1,30 @@
 const express = require('express')
 const router = express.Router()
+const { pool } = require('../db')
 
-const mysql = require('../db')
+const loadExTable = async() => {
+  try {
+    const connection = await pool.getConnection(async conn => conn)
 
-router.get('/', (req, res) => {
-  const connection = mysql.init()
-  // console.log(await mysql.send_exhi_data(connection))
-  // res.send(mysql.send_exhi_data(connection))
+    try {
+      const [rows] = await connection.query('SELECT * FROM exhibition')
+      connection.release()
+      return rows
+    } catch(err) {
+      console.log('Query error')
+      connection.release()
+      return false
+    }
+
+  } catch(err) {
+    console.log('DB error')
+    return false
+  }
+}
+
+router.get('/', async (req, res) => {
+  let exData = await loadExTable()
+  res.send(exData)
 })
 
 module.exports = router
