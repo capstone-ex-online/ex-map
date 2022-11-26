@@ -17,23 +17,21 @@
     "nodemon": "^2.0.19"
   },
   "dependencies": {
+    "aws-sdk": "^2.1261.0",
     "axios": "^1.1.2",
     "concurrently": "^7.4.0",
-<<<<<<< HEAD
-    "faker": "^6.6.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "multer-s3": "^3.0.1",
+    "mysql": "^2.18.1",
     "mysql2": "^2.3.3",
     "react-table": "^7.8.0",
     "request": "^2.88.2",
     "styled-components": "^5.3.6",
     "vector-icons": "^0.1.0",
-=======
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2",
-    "mysql": "^2.18.1",
-    "request": "^2.88.2",
     "vite": "^3.1.8",
->>>>>>> 0700d30eb210bfc8457ac9a2b3a841631464fbfe
     "xml-js": "^1.6.11"
   }
 }

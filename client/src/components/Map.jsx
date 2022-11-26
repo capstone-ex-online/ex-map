@@ -10,7 +10,7 @@ import exampleImg from '../assets/first_main.jpg'
 
 const { kakao } = window;
 
-let mappingList = {};
+let mappingList =[];
 
 
 const MapPageContainer = styled.div`
@@ -18,14 +18,6 @@ const MapPageContainer = styled.div`
   height: 100%;
   display: inline-block;
 `;
-
-const HeaderContainer = styled.div`
-  width:1440px;
-  height:91px;
-  border: 1px solid black;
-`;
-
-
 
 const MapContainer = styled.div`
   display:flex;
@@ -59,10 +51,7 @@ const MapBox = styled.div`
     width:1100px;
     height:68px;
 
-    
   
-    
-
     .MapLockButton{
       margin-top : 20px;
       margin-left : 20px;
@@ -102,6 +91,7 @@ const ExhibitionList = styled.div`
 function Map() {
   const [map, setMap] = useState(null);
   const [exhiList, setExhiList] = useState([])
+  const [ListContents, setListContents] = useState([])
 
   let imageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png"
 
@@ -151,9 +141,10 @@ function Map() {
 
   Axios.get('http://localhost:5000/api/exhibition')
   .then((response) => {
-    console.log(response.data)
+    // console.log(response.data)
     makeMarkers(response.data)
   })
+
 
   function makeMarkers(array) {
     for(let i = 0; i < array.length; i++) {
@@ -170,16 +161,6 @@ function Map() {
         image: markerImage,
       })
 
-      // let object = {
-      //   marker: marker,
-      //   data: {
-      //     seq: array[i].seq._text,
-      //     title: array[i].title._text,
-      //     startDate: array[i].startDate._text,
-      //     endDate: array[i].endDate._text,
-      //     thumbnail: array[i].thumbnail._text
-
-
       let object = {
         marker: marker,
         data: {
@@ -191,13 +172,38 @@ function Map() {
 
         }
       }
-
       let temp_id = 'id' + i
       mappingList[temp_id] = object
-      
+
+      // console.log(mappingList)
+      const ListContent=Object.values(mappingList).map((exhibision) => (
+      <>
+        <ul>
+          <img src={exhibision.data.thumbnail} width="100px"></img> 
+          <li>Name: {exhibision.data.title}</li>
+          <li>Start_Date:{exhibision.data.startDate}</li>
+          <li>Finish_Date: {exhibision.data.endDate}</li>
+        </ul>
+        <hr />
+      </>));
+
+      setListContents(ListContent)
+
+      console.log(ListContent)
+
+
+    
+        
+
+
+  
+
+
       kakao.maps.event.addListener(marker, 'click', function() {    
         setExhiList([])    
         let values = Object.values(mappingList)
+
+        
 
         for(let j = 0; j < values.length; j++) {
           if(values[j].marker === marker) {
@@ -212,6 +218,7 @@ function Map() {
             // }
             setExhiList(new Array(values[j].data))
             console.log(exhiList)
+            console.log(mappingList)
           }
         }
 
@@ -227,98 +234,37 @@ function Map() {
 
   
 
-  var ExhibisionList=
-  [
-    {
-      "ex_name" : "이완개인전",
-      "start_date" : "2022.09.03",
-      "finish_date" : "2022.10.03",
-      "location" : "Space-X",
-      "img_src" : exampleImg
-    },
-    {
-      "ex_name" : "한자 전시회",
-      "start_date" : "2022.09.07",
-      "finish_date" : "2022.10.24",
-      "location" : "숭실대학교",
-      "img_src" : exampleImg
-    },
-    {
-      "ex_name" : "곽훈:Halaayt",
-      "start_date" : "2022.09.21",
-      "finish_date" : "2022.10.29",
-      "location" : "Space-Z",
-      "img_src" : exampleImg
-    },
-    {
-      "ex_name" : "최은혜:Variable",
-      "start_date" : "2022.09.15",
-      "finish_date" : "2022.10.31",
-      "location" : "Space-V",
-      "img_src" : exampleImg
-    },
-    {
-      "ex_name" : "5번째 전시회",
-      "start_date" : "2022.10.03",
-      "finish_date" : "2022.10.13",
-      "location" : "Space-R",
-      "img_src" : exampleImg
-    },
-    {
-      "ex_name" : "6번째 전시회",
-      "start_date" : "2022.11.03",
-      "finish_date" : "2022.11.05",
-      "location" : "Space-Y",
-      "img_src" : exampleImg
-    }
-  ]
-
-
   
 
 
 
   
-  
-
-
 
 
   return (
       <MapPageContainer>
-        <HeaderContainer>
-        </HeaderContainer>
         <MapContainer>
           <ListBox id="listbox">
-            {ExhibisionList.map((exhibision,index) => {
+
+            {ListContents}
+             
+  
+            {/* {Object.values(mappingList).map((exhibision) => {
+              console.log(exhibision)
               const list = (
                 <>
-                  <ul id={index}>
-                    <img src={exhibision.img_src} width="100px"></img>
-                    <li>Name: {exhibision.ex_name}</li>
-                    <li>Start_Date:{exhibision.start_date}</li>
-                    <li>Finish_Date: {exhibision.finish_date}</li>     {/* 예시데이터 출력 */}
+                  <ul>
+                    <img src={exhibision.data.thumbnail} width="100px"></img> 
+                    <li>Name: {exhibision.data.title}</li>
+                    <li>Start_Date:{exhibision.data.startDate}</li>
+                    <li>Finish_Date: {exhibision.data.endDate}</li>
                   </ul>
                   <hr />
                 </>
               );
               return list;
             })}
-
-            {/* {Object.values(mappingList).map((exhibision) => {
-              const list = (
-                <>
-                  <ul>
-                    <img src={exhibision.data.thumbnail._text} width="100px"></img> //api 데이터 출력 미완성
-                    <li>Name: {exhibision.data.title._text}</li>
-                    <li>Start_Date:{exhibision.data.startDate._text}</li>
-                    <li>Finish_Date: {exhibision.data.endDate._text}</li>
-                  </ul>
-                  <hr />
-                </>
-              );
-              return list;
-            })} */}
+            {console.log(mappingList)} */}
 
           </ListBox>
           {/* <script>
