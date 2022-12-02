@@ -10,21 +10,17 @@ import exampleImg from '../assets/first_main.jpg'
 
 const { kakao } = window;
 
-let mappingList =[];
-
+let mappingList = [];
 
 const MapPageContainer = styled.div`
-  width: 100%;
-  height: 100%;
+  width:1440px;
+  height: 935px;
   display: inline-block;
+  display:flex;
 `;
 
-const MapContainer = styled.div`
-  display:flex;
-  border: 1px solid black;
-  width:1440px;
-  height:933px;
-`;
+
+
 
 const ListBox = styled.div`
 
@@ -34,6 +30,21 @@ const ListBox = styled.div`
   overflow-y:scroll;
   overflow-x:hidden;
 
+`;
+
+const Review = styled.div`
+  display:flex;
+  
+
+  #ReviewButton{
+    cursor: pointer;
+  }
+
+  #CheckBox{
+    margin-left:200px;
+    cursor: pointer;
+    float : right;
+  }
 `;
 
 const MapBox = styled.div`
@@ -58,7 +69,6 @@ const MapBox = styled.div`
       width : 28px;
       height : 28px;
       cursor: pointer;
-
     }
 
     .MapZoomIn{
@@ -83,26 +93,23 @@ const MapBox = styled.div`
   }
 `
 
-const ExhibitionList = styled.div`
-  width: 500px;
-  height: 500px;
-`
 
 function Map() {
   const [map, setMap] = useState(null);
-  const [exhiList, setExhiList] = useState([])
-  const [ListContents, setListContents] = useState([])
+  const [ListContents, setListContents] = useState([]);
+  const [ListCheck, setListCheck] = useState([]);
+
 
   let imageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png"
 
+
   //처음 지도 그리기
   useEffect(()=>{
+
+      
       const container = document.getElementById('map');
-
       const options = { center: new kakao.maps.LatLng(37.5668, 126.9786), level: 7 };
-
       const kakaoMap = new kakao.maps.Map(container, options);
-
       const mapTypeControl = new kakao.maps.MapTypeControl(); // 일반 지도와 스카이뷰로 지도 타입을 전환할 수 있는 지도타입 컨트롤을 생성합니다
       kakaoMap.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
       
@@ -110,7 +117,6 @@ function Map() {
       kakaoMap.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
       setMap(kakaoMap);
   },[])
-
 
   function setDraggable(draggable) {
     // 마우스 드래그로 지도 이동 가능여부를 설정합니다
@@ -132,18 +138,55 @@ function Map() {
   function MapLock(){
     MapLocksetState(!MapLockstate);
     MapLockstate ? setDraggable(true) : setDraggable(false);
-
   }
 
 
 
-
-
   Axios.get('http://localhost:5000/api/exhibition')
-  .then((response) => {
-    // console.log(response.data)
-    makeMarkers(response.data)
-  })
+      .then((response) => {
+        console.log("test")
+        if(ListContents.length==0) {
+          const ListContent=(response.data).map((exhibision,index) => (  
+            <>
+              <ul id = {index}
+                  onClick={()=> ListClick(index,response.data)}>
+                <img src={exhibision.ex_img} width="100px"></img> 
+                <li>Name: {exhibision.ex_title}</li>
+                <li>Start_Date:{exhibision.ex_start}</li>
+                <li>Finish_Date: {exhibision.ex_end}</li>
+              </ul>
+              <hr />
+            </>));
+        setListContents(ListContent)
+        }
+        makeMarkers(response.data)
+      })
+
+  function ListClick(ClickIndex,List){
+    const newArr = List.map((exhibision,index) => (  
+      <>
+        <ul id = {index}
+            onClick={()=> ListClick(index,List)}>
+          <img src={exhibision.ex_img} width="100px"></img> 
+          <li>Name: {exhibision.ex_title}</li>
+          <li>Start_Date:{exhibision.ex_start}</li>
+          <li>Finish_Date: {exhibision.ex_end}</li>
+          {(ClickIndex===index) &&  <div>
+            <li>상세내용 : {exhibision.ex_info}</li>
+            <Review>
+              <button id='ReviewButton'><link to={"/"+exhibision.ex_id}></link>리뷰 </button>
+              <input id='CheckBox' type="checkbox" /> {/* 체크 박스 정보 추가 필요*/}
+            </Review>
+          </div>}
+          
+        </ul>
+        <hr />
+      </>));
+    setListContents(newArr)
+  }
+
+
+     
 
 
   function makeMarkers(array) {
@@ -164,120 +207,55 @@ function Map() {
       let object = {
         marker: marker,
         data: {
-          seq: array[i].ex_id,
-          title: array[i].ex_title,
-          startDate: array[i].ex_start,
-          endDate: array[i].ex_end,
-          thumbnail: array[i].ex_img
-
+          ex_id: array[i].ex_id,
+          ex_title: array[i].ex_title,
+          ex_start: array[i].ex_start,
+          ex_end: array[i].ex_end,
+          ex_img: array[i].ex_img,
+          ex_info: array[i].ex_info
         }
       }
+
       let temp_id = 'id' + i
       mappingList[temp_id] = object
+     
 
-      // console.log(mappingList)
-      const ListContent=Object.values(mappingList).map((exhibision) => (
-      <>
-        <ul>
-          <img src={exhibision.data.thumbnail} width="100px"></img> 
-          <li>Name: {exhibision.data.title}</li>
-          <li>Start_Date:{exhibision.data.startDate}</li>
-          <li>Finish_Date: {exhibision.data.endDate}</li>
-        </ul>
-        <hr />
-      </>));
-
-      setListContents(ListContent)
-
-      console.log(ListContent)
-
-
-    
-        
-
-
-  
-
-
-      kakao.maps.event.addListener(marker, 'click', function() {    
-        setExhiList([])    
+      kakao.maps.event.addListener(marker, 'click', function() {     
         let values = Object.values(mappingList)
-
-        
-
+        let temp_arr = []
+  
         for(let j = 0; j < values.length; j++) {
-          if(values[j].marker === marker) {
-            // if(exhiList.length === 0) {
-            //   setExhiList(values[j].data)
-            //   console.log(exhiList)
-            // } else {
-            //   let temp_arr = new Array(exhiList)
-            //   temp_arr.push(values[j].data)
-            //   setExhiList(temp_arr)
-            //   console.log(exhiList)
-            // }
-            setExhiList(new Array(values[j].data))
-            console.log(exhiList)
-            console.log(mappingList)
+          if((values[j].marker.Rc.x === marker.Rc.x) && (values[j].marker.Rc.y === marker.Rc.y)) {
+            temp_arr.push(values[j].data)
           }
         }
 
+        const ListContent=temp_arr.map((exhibision,index) => (
+          <>
+            <ul id = {index}
+                  onClick={()=> ListClick(index,temp_arr)}>
+              <img src={exhibision.ex_img} width="100px"></img> 
+              <li>Name: {exhibision.ex_title}</li>
+              <li>Start_Date:{exhibision.ex_start}</li>
+              <li>Finish_Date: {exhibision.ex_end}</li>
+            </ul>
+            <hr />
+          </>));
+          setListContents(ListContent)
       })
+      
     }
 
-    // let values = Object.values(mappingList).data;
     
   }
 
   
-
-
-  
-
-  
-
-
-
-  
-
-
   return (
-      <MapPageContainer>
-        <MapContainer>
-          <ListBox id="listbox">
-
-            {ListContents}
-             
-  
-            {/* {Object.values(mappingList).map((exhibision) => {
-              console.log(exhibision)
-              const list = (
-                <>
-                  <ul>
-                    <img src={exhibision.data.thumbnail} width="100px"></img> 
-                    <li>Name: {exhibision.data.title}</li>
-                    <li>Start_Date:{exhibision.data.startDate}</li>
-                    <li>Finish_Date: {exhibision.data.endDate}</li>
-                  </ul>
-                  <hr />
-                </>
-              );
-              return list;
-            })}
-            {console.log(mappingList)} */}
-
-          </ListBox>
-          {/* <script>
-            const $listbox = document.getElementById('listbox');   //미완성 부분입니다
-    
-            $fruits.addEventListener('click', e => {
-      console.log(`이벤트 단계: ${e.eventPhase}`); // "이벤트 단계: 3" = 버블링 단계
-      console.log(`이벤트 타깃: ${e.target}`); // "이벤트 타깃: [object HTMLLIElement]"
-      console.log(`커런트 타깃: ${e.currentTarget}`); // "커런트 타깃: [object HTMLUListElement]"
-    });
-          </script> */} 
-
-          <MapBox>
+    <MapPageContainer>
+      <ListBox id="listbox">
+          {ListContents}
+      </ListBox>
+      <MapBox>
             <div id='map'></div>
             <span id='setting'>
               <img class='MapLockButton'src={MapLockstate ? lock_on : lock_off } alt="Lock Button" onClick={MapLock}></img>
@@ -285,36 +263,10 @@ function Map() {
               <img class='MapZoomIn'src={zoom_in} alt="Zoom In Button" onClick={zoomIn}></img>
 
             </span>
-          </MapBox>
-          
-        </MapContainer>
-      </MapPageContainer>
-
-
-    // <MapPageContainer>
-    //   <MapBox>
-    //     <div id='map'></div>
-    //   </MapBox>
-    //   <ExhibitionList
-    //     exhiList={exhiList}
-    //   >
-    //     {exhiList && exhiList.map((exhibition, index) => {
-    //       return (
-    //         <div key={index}>
-    //           <h2>title: {exhibition.title}</h2>
-    //           <h2>startDate: {exhibition.startDate}</h2>
-    //           <h2>endDate: {exhibition.endDate}</h2>
-    //           <div style={{width: 100 + 'px', 
-    //             height: 100 + 'px', 
-    //             backgroundImage: `url(${exhibition.thumbnail})`,
-    //             backgroundSize: 100 + 'px'}}  ></div>
-    //         </div>
-    //       )
-    //     })}
-    //   </ExhibitionList>
-    // </MapPageContainer>
-
+      </MapBox>
+    
+    </MapPageContainer>
   )
 }
 
-export default Map;
+export default React.memo(Map);
